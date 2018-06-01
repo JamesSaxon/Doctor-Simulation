@@ -72,7 +72,7 @@ for (i in 1:46){
         set.seed(1)
         a <- rbinom(10000,5000,prob)*20
   
-        #If the #doc is 1, I want the value of 2nd row of SEresult.
+        #If the #doc is 1, I want the value of the 2nd row of SEresult.
         b<- a+1                          
         c <- rep(NA,10000)
         c <- SEresult[b]
