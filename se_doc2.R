@@ -1,0 +1,79 @@
+#Incorporate the replicate weights into the previous simulation.
+
+load("result.RData")
+
+#Function to return SE calculated using rep weights with N~(1,1/5)
+
+SEcalc <- function(no_doc){
+  repdoc <- rep(NA, 80)
+  
+  for (i in 1:80){
+    set.seed(i)
+    repdoc[i] <- sum(rnorm(no_doc,1,2.5))  
+  }
+  
+  differencesq <- (repdoc - no_doc)^2
+  SE <- sqrt(4/80 * sum(differencesq))
+  rm(repdoc,differencesq)
+  SE
+}
+
+#Get SEs for a different number of docs using the function above.
+#Number of docs will range from 1 to 500
+
+doctors <- 1:1500
+SEresult <- rep(NA,1500)
+
+for (i in doctors){
+  SEresult[i] <- SEcalc(i)
+}
+
+SEresult <- c(0,SEresult)
+
+#Use mean of doctors from 10K draws to see the SE with the weights
+
+SEresult46 <- rep(NA,46)
+
+for (i in 1:46){
+  prob <- 0.0005+0.0001*(i-1)
+  set.seed(1)
+  a <- rbinom(10000,5000,prob)*20
+  
+  #If the #doc is 1, I want the value of 2nd row of SEresult.
+  b<- a+1                          
+  c <- rep(NA,10000)
+  c <- SEresult[b]
+  SEresult46[i] <- mean(c)        #Mean of SE for 10K trials
+  rm(prob,a,b,c)
+}
+
+result2 <- data.frame(result,SEresult46)
+
+replower1.96 <- result$mean46 - SEresult46*1.96
+rephigher1.96 <- result$mean46 + SEresult46*1.96
+
+result2 <- data.frame(result,replower1.96,rephigher1.96)
+save(result2,file="result2.RData")
+
+a <- result2$prob46
+b <- result2$mean46
+c <- result2$qlow46
+d <- result2$qhigh46
+e <- result2$lower1.96
+f <- result2$higher1.96
+
+plot(a, b,col="1",xlim=c(0.0005,0.005),type="l",lty=2,
+     xlab="Probability of Being a Doctor",ylab="#Doctors per 100K People")
+lines(a,c,col="1")
+lines(a,d,col="1")
+lines(a,e,col="2")
+lines(a,f,col="2")
+lines(a,rephigher1.96,col="4")
+lines(a,replower1.96,col="4")
+
+name <- c("Mean", "Actual (2.5%,97.5%)", "CI by 1.96*Standard Deviation",
+          "CI by Weights(2.5)-Based Error")
+legend(x="topleft",legend=c(name),col=c("1","1","2","4"),
+       lty=c(2,1,1,1),cex=0.75,bty="n")
+
+
