@@ -7,7 +7,7 @@ SEcalc <- function(no_doc){
  
            for (i in 1:80){
                        set.seed(i)
-                       repdoc[i] <- sum(rnorm(no_doc,1,1/5))  
+                       repdoc[i] <- sum(rnorm(no_doc,1,2.5))  
                }
    
             differencesq <- (repdoc - no_doc)^2
